@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Love Brina</title>
+    <style>
+        :root {
+            --bg-black: #0f0a10;
+            --bg-soft: #1d111c;
+            --pink: #ff5ca8;
+            --pink-soft: #ffc8df;
+            --text: #fff4fa;
+            --panel: rgba(255, 255, 255, 0.06);
+            --line: rgba(255, 172, 213, 0.3);
+            --shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            overflow-x: hidden;
+            color: var(--text);
+            font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+            scroll-behavior: smooth;
+            background:
+                radial-gradient(circle at 15% 15%, rgba(255, 96, 166, 0.25), transparent 32%),
+                radial-gradient(circle at 80% 5%, rgba(255, 130, 190, 0.2), transparent 28%),
+                radial-gradient(circle at 60% 70%, rgba(255, 90, 150, 0.22), transparent 35%),
+                linear-gradient(135deg, var(--bg-black), var(--bg-soft) 55%, #0a070b);
+        }
+
+        .ambient {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .ambient span {
+            position: absolute;
+            color: rgba(255, 155, 205, 0.32);
+            animation: floatUp linear infinite;
+            filter: drop-shadow(0 0 8px rgba(255, 120, 180, 0.35));
+        }
+
+        .page {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            min-height: 100vh;
+            margin: 0 auto;
+            padding: 28px 20px 60px;
+            display: grid;
+            place-items: center;
+        }
+
+        .screen {
+            display: none;
+            width: 100%;
+            animation: fadeUp 0.8s ease both;
+        }
+
+        .screen.is-active {
+            display: block;
+        }
+
+        .intro-box {
+            max-width: 840px;
+            margin: 0 auto;
+            text-align: center;
+            border: 1px solid var(--line);
+            border-radius: 34px;
+            padding: clamp(24px, 5vw, 44px);
+            background: linear-gradient(160deg, rgba(255, 170, 220, 0.12), rgba(0, 0, 0, 0.2));
+            box-shadow: var(--shadow);
+        }
+
+        .intro-title {
+            font-size: clamp(2rem, 5vw, 4rem);
+            letter-spacing: 0.04em;
+            text-shadow: 0 10px 30px rgba(255, 111, 182, 0.4);
+            margin-bottom: 14px;
+        }
+
+        .intro-text {
+            font-size: clamp(1rem, 2vw, 1.3rem);
+            color: #ffe6f4;
+            opacity: 0.94;
+            margin-bottom: 26px;
+        }
+
+        .button-wrap {
+            display: flex;
+            justify-content: center;
+        }
+
+        .love-btn {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            padding: 20px 22px;
+            box-shadow: rgba(10, 37, 64, 0.35) 0 -2px 6px inset, 0 14px 40px rgba(255, 85, 160, 0.25);
+            background-color: #181016;
+            border-color: #ffa7ce;
+            border-style: solid;
+            border-width: 9px;
+            border-radius: 35px;
+            transition:
+                transform 400ms cubic-bezier(.68, -0.55, .27, 2.5),
+                border-color 400ms ease-in-out,
+                background-color 400ms ease-in-out;
+            color: #ffe6f1;
+            word-spacing: -2px;
+            cursor: pointer;
+            font-size: 1.05rem;
+            letter-spacing: 0.04em;
+            user-select: none;
+            overflow: hidden;
+        }
+
+        .love-btn::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(130deg, rgba(255, 130, 186, 0.2), transparent 45%, rgba(255, 140, 198, 0.25));
+            opacity: 0.9;
+            pointer-events: none;
+        }
+
+        .love-btn span {
+            position: relative;
+            z-index: 1;
+        }
+
+        @keyframes movingBorders {
+            0% { border-color: #ffd4e8; }
+            50% { border-color: #ff9fca; }
+            90% { border-color: #ffd4e8; }
+        }
+
+        .love-btn:hover {
+            background-color: #22131d;
+            transform: scale(1.05);
+            animation: movingBorders 3s infinite;
+        }
+
+        .icon-wrap {
+            position: relative;
+            width: 28px;
+            height: 28px;
+            display: inline-flex;
+            z-index: 1;
+        }
+
+        .filled,
+        .empty {
+            fill: rgb(255, 110, 110);
+            transition: opacity 100ms ease-in-out;
+            position: absolute;
+            inset: 0;
+        }
+
+        .filled {
+            opacity: 0;
+        }
+
+        @keyframes beatingHeart {
+            0% { transform: scale(1); }
+            15% { transform: scale(1.15); }
+            30% { transform: scale(1); }
+            45% { transform: scale(1.15); }
+            60% { transform: scale(1); }
+        }
+
+        .love-btn:hover .empty {
+            opacity: 0;
+        }
+
+        .love-btn:hover .filled {
+            opacity: 1;
+            animation: beatingHeart 1.2s infinite;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: clamp(1.4rem, 3vw, 2.1rem);
+            margin-bottom: 16px;
+            text-shadow: 0 7px 22px rgba(255, 116, 185, 0.35);
+        }
+
+        .cards-shell {
+            position: relative;
+            border: 1px solid var(--line);
+            border-radius: 32px;
+            min-height: 560px;
+            background: linear-gradient(170deg, rgba(255, 150, 205, 0.09), rgba(0, 0, 0, 0.22));
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .cards-caption {
+            position: absolute;
+            inset: 0;
+            display: grid;
+            place-items: center;
+            text-align: center;
+            pointer-events: none;
+            padding: 20px;
+            color: rgba(255, 220, 238, 0.38);
+            font-size: clamp(1rem, 2vw, 2rem);
+            font-weight: 700;
+        }
+
+        .love-card {
+            position: absolute;
+            width: 220px;
+            border-radius: 22px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 188, 219, 0.55);
+            background: #120c12;
+            box-shadow: 0 14px 30px rgba(0, 0, 0, 0.5);
+            transform: translate(var(--dx), var(--dy)) rotate(var(--rot)) scale(var(--drag-scale, 1));
+            top: var(--top);
+            left: var(--left);
+            transition: box-shadow 260ms ease, transform 260ms ease;
+            touch-action: none;
+            cursor: grab;
+            will-change: transform;
+            animation: cardIn 700ms cubic-bezier(.21, .8, .27, 1) backwards;
+            animation-delay: var(--delay);
+        }
+
+        .love-card:active {
+            cursor: grabbing;
+        }
+
+        .love-card:hover {
+            box-shadow: 0 20px 50px rgba(255, 118, 183, 0.3);
+        }
+
+        .love-card.is-dragging {
+            box-shadow: 0 30px 60px rgba(255, 112, 184, 0.34);
+        }
+
+        .love-card img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            display: block;
+            user-select: none;
+            pointer-events: none;
+        }
+
+        .love-card h3 {
+            padding: 12px;
+            font-size: 0.96rem;
+            color: #ffe4f1;
+            text-align: center;
+            line-height: 1.45;
+        }
+
+        .nav-row {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            border: 1px solid rgba(255, 183, 221, 0.45);
+            background: rgba(24, 16, 22, 0.86);
+            color: #ffe5f2;
+            border-radius: 999px;
+            padding: 11px 18px;
+            cursor: pointer;
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            border-color: #ff9bcb;
+        }
+
+        .quotes-container {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 18px;
+            padding: 0 16px;
+        }
+
+        .quote-card {
+            border-radius: 20px;
+            background: linear-gradient(145deg, rgba(255, 168, 214, 0.16), rgba(255, 103, 170, 0.09));
+            border: 1px solid rgba(255, 194, 225, 0.45);
+            padding: 22px;
+            color: #ffe8f4;
+            backdrop-filter: blur(2px);
+            box-shadow: 0 14px 26px rgba(0, 0, 0, 0.24);
+            transition: transform 350ms cubic-bezier(.2, .8, .2, 1), box-shadow 280ms ease;
+            position: relative;
+            overflow: hidden;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .quote-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(120deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0));
+            opacity: 0;
+            transition: opacity 250ms ease;
+            pointer-events: none;
+        }
+
+        .quote-card:hover {
+            transform: translateY(-6px) scale(1.02);
+            box-shadow: 0 24px 40px rgba(0, 0, 0, 0.34);
+        }
+
+        .quote-card:hover::before {
+            opacity: 1;
+        }
+
+        .quote-card p {
+            font-size: 0.94rem;
+            line-height: 1.62;
+            color: #fff0f8;
+            margin: 0;
+        }
+
+        .quote-card small {
+            display: block;
+            margin-top: 14px;
+            color: var(--pink-soft);
+            letter-spacing: 0.06em;
+            font-size: 0.85rem;
+            font-style: italic;
+        }
+
+        .quote-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 16px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255, 194, 225, 0.25);
+        }
+
+        .heart-btn {
+            background: none;
+            border: none;
+            color: #ff6b87;
+            font-size: 1.4rem;
+            cursor: pointer;
+            transition: transform 200ms ease, filter 200ms ease;
+            padding: 4px 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            user-select: none;
+        }
+
+        .heart-btn:hover {
+            transform: scale(1.15);
+            filter: drop-shadow(0 0 8px rgba(255, 107, 135, 0.5));
+        }
+
+        .heart-btn:active {
+            transform: scale(0.95);
+        }
+
+        .like-count {
+            font-size: 0.85rem;
+            color: var(--pink-soft);
+            font-weight: 600;
+        }
+
+        .flower-container {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        .flower-3d {
+            position: absolute;
+            font-size: 2rem;
+            animation: flowerFloat 3s ease-out forwards;
+            filter: drop-shadow(0 0 12px rgba(255, 107, 135, 0.6));
+            text-shadow: 0 0 8px rgba(255, 150, 205, 0.8);
+        }
+
+        @keyframes flowerFloat {
+            0% {
+                transform: translate(0, 0) rotateX(0) rotateY(0) rotateZ(0) scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: translate(var(--tx), var(--ty)) rotateX(45deg) rotateY(45deg) rotateZ(180deg) scale(0.8);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--tx), var(--ty)) rotateX(90deg) rotateY(180deg) rotateZ(360deg) scale(0.2);
+                opacity: 0;
+            }
+        }
+
+        @keyframes slideInfinite {
+            from { transform: translateX(0); }
+            to { transform: translateX(-50%); }
+        }
+
+        @keyframes cardIn {
+            from {
+                opacity: 0;
+                transform: translate(0, 40px) rotate(0deg) scale(0.92);
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes floatUp {
+            from {
+                transform: translateY(105vh) rotate(0deg);
+                opacity: 0;
+            }
+            15% {
+                opacity: 1;
+            }
+            to {
+                transform: translateY(-10vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 900px) {
+            .cards-shell {
+                min-height: 650px;
+            }
+
+            .love-card {
+                width: 180px;
+            }
+
+            .love-card img {
+                height: 210px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .love-btn {
+                padding: 16px 18px;
+                border-width: 7px;
+            }
+
+            .cards-shell {
+                min-height: 760px;
+            }
+
+            .love-card {
+                width: 156px;
+            }
+
+            .love-card img {
+                height: 178px;
+            }
+
+            .quote-card:hover {
+                transform: translateY(-3px) scale(1.01);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="ambient" aria-hidden="true" id="ambient"></div>
+
+    <audio id="bgMusic" loop autoplay preload="auto">
+        <source src="awalkisahselamanya.mp3" type="audio/mpeg">
+    </audio>
+
+    <main class="page">
+        <section class="screen is-active" id="page1">
+            <div class="intro-box">
+                <h1 class="intro-title">I LOVE U BRINA</h1>
+                <p class="intro-text">klik ini buat halaman selanjutnya</p>
+                <div class="button-wrap">
+                    <button class="love-btn" type="button" data-go="page2" aria-label="Next Page">
+                        <span>Next Page</span>
+                        <span class="icon-wrap">
+                            <svg class="empty" viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path>
+                            </svg>
+                            <svg class="filled" viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path>
+                            </svg>
+                        </span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section class="screen" id="page2">
+            <section class="cards-shell">
+                <p class="cards-caption">Drag kartu fotonya sesuka kamu</p>
+
+                <article class="love-card" style="--top: 10%; --left: 10%; --rot: -7deg; --dx: 0px; --dy: 0px; --delay: 0.05s;">
+                    <img src="p1.jpeg" alt="Foto 1">
+                    <h3>cewe paling cantik dan manis</h3>
+                </article>
+
+                <article class="love-card" style="--top: 34%; --left: 17%; --rot: 8deg; --dx: 0px; --dy: 0px; --delay: 0.12s;">
+                    <img src="p2.jpeg" alt="Foto 2">
+                    <h3>cewe paling cantik dan manis</h3>
+                </article>
+
+                <article class="love-card" style="--top: 8%; --left: 35%; --rot: -2deg; --dx: 0px; --dy: 0px; --delay: 0.18s;">
+                    <img src="p3.jpeg" alt="Foto 3">
+                    <h3>cewe paling cantik dan manis</h3>
+                </article>
+
+                <article class="love-card" style="--top: 30%; --left: 50%; --rot: 9deg; --dx: 0px; --dy: 0px; --delay: 0.24s;">
+                    <img src="p4.jpeg" alt="Foto 4">
+                    <h3>cewe paling cantik dan manis</h3>
+                </article>
+
+                <article class="love-card" style="--top: 12%; --left: 68%; --rot: -6deg; --dx: 0px; --dy: 0px; --delay: 0.3s;">
+                    <img src="p5.jpeg" alt="Foto 5">
+                    <h3>cewe paling cantik dan manis</h3>
+                </article>
+            </section>
+
+            <div class="nav-row">
+                <button class="nav-btn" type="button" data-go="page1">Kembali Page 1</button>
+                <button class="nav-btn" type="button" data-go="page3">Lanjut Page 3</button>
+            </div>
+        </section>
+
+        <section class="screen" id="page3">
+            <div style="width: 100%; display: flex; flex-direction: column; gap: 24px;">
+                <h2 class="section-title">Kata Kata Buat Kamu</h2>
+                
+                <div class="quotes-container">
+                    <article class="quote-card" data-quote-id="0">
+                        <p>"aku mau kamu dengan keadaan ga terpaksa, so i'll be waiting and always beside u vel jadi selalu jadi diri kamu yaaa jangan pernah memaksa untuk berubah menjadi orang lain be ur self dan aku bakalan suka sama kamu yang menjadi diri kamu sendiri❤️"</p>
+                        <div class="quote-actions">
+                            <small>for you, always</small>
+                            <button class="heart-btn" type="button" aria-label="Like this quote">
+                                <span class="heart-icon">🌸</span>
+                                <span class="like-count">0</span>
+                            </button>
+                        </div>
+                    </article>
+                    
+                    <article class="quote-card" data-quote-id="1">
+                        <p>"aku serius sama kamu, kamu bingung pasti aku ngomong gitu karena kita belum pernah ketemu, tapi aku ngomong gini karena aku suka sama kamu, jadi seapapun seberapapun segimanapun aku tetep pilih kamu buat sekarang dan masa depanku❤️"</p>
+                        <div class="quote-actions">
+                            <small>today, tomorrow, forever</small>
+                            <button class="heart-btn" type="button" aria-label="Like this quote">
+                                <span class="heart-icon">🌸</span>
+                                <span class="like-count">0</span>
+                            </button>
+                        </div>
+                    </article>
+                    
+                    <article class="quote-card" data-quote-id="2">
+                        <p>"kadang aku ngerasa tenang banget cuma dari chat kamu, sesimpel itu tapi efeknya bisa bikin hari aku jauh lebih baik, jadi jangan bosen ya kalo aku sering nyariin kamu❤️"</p>
+                        <div class="quote-actions">
+                            <small>my calm place</small>
+                            <button class="heart-btn" type="button" aria-label="Like this quote">
+                                <span class="heart-icon">🌸</span>
+                                <span class="like-count">0</span>
+                            </button>
+                        </div>
+                    </article>
+                    
+                    <article class="quote-card" data-quote-id="3">
+                        <p>"aku ga butuh yang paling sempurna, aku cuma butuh kamu yang selalu jujur jadi diri kamu sendiri, karena versi kamu yang itu yang bikin aku nyaman banget❤️"</p>
+                        <div class="quote-actions">
+                            <small>only you</small>
+                            <button class="heart-btn" type="button" aria-label="Like this quote">
+                                <span class="heart-icon">🌸</span>
+                                <span class="like-count">0</span>
+                            </button>
+                        </div>
+                    </article>
+                    
+                    <article class="quote-card" data-quote-id="4">
+                        <p>"kalo nanti jalannya pelan gapapa, yang penting kita sama-sama jalan dan saling jagain, aku ada bukan cuma buat hari ini tapi buat hari-hari setelahnya juga❤️"</p>
+                        <div class="quote-actions">
+                            <small>slowly but surely</small>
+                            <button class="heart-btn" type="button" aria-label="Like this quote">
+                                <span class="heart-icon">🌸</span>
+                                <span class="like-count">0</span>
+                            </button>
+                        </div>
+                    </article>
+                </div>
+
+                <div class="nav-row">
+                    <button class="nav-btn" type="button" data-go="page2">Kembali Page 2</button>
+                    <button class="nav-btn" type="button" data-go="page1">Kembali Page 1</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const cards = document.querySelectorAll('.love-card');
+        let zCounter = 20;
+
+        cards.forEach((card) => {
+            let startX = 0;
+            let startY = 0;
+            let baseX = parseFloat(card.dataset.dx || '0');
+            let baseY = parseFloat(card.dataset.dy || '0');
+            let targetX = baseX;
+            let targetY = baseY;
+            let renderX = baseX;
+            let renderY = baseY;
+            let isDragging = false;
+            let frameId = 0;
+
+            const animate = () => {
+                renderX += (targetX - renderX) * 0.22;
+                renderY += (targetY - renderY) * 0.22;
+
+                card.dataset.dx = String(renderX);
+                card.dataset.dy = String(renderY);
+                card.style.setProperty('--dx', renderX + 'px');
+                card.style.setProperty('--dy', renderY + 'px');
+
+                if (isDragging || Math.abs(targetX - renderX) > 0.08 || Math.abs(targetY - renderY) > 0.08) {
+                    frameId = requestAnimationFrame(animate);
+                } else {
+                    frameId = 0;
+                }
+            };
+
+            const startAnimate = () => {
+                if (!frameId) {
+                    frameId = requestAnimationFrame(animate);
+                }
+            };
+
+            card.addEventListener('pointerdown', (event) => {
+                event.preventDefault();
+                card.setPointerCapture(event.pointerId);
+
+                isDragging = true;
+                card.classList.add('is-dragging');
+                card.style.setProperty('--drag-scale', '1.03');
+
+                startX = event.clientX;
+                startY = event.clientY;
+                baseX = parseFloat(card.dataset.dx || '0');
+                baseY = parseFloat(card.dataset.dy || '0');
+
+                zCounter += 1;
+                card.style.zIndex = String(zCounter);
+
+                const onMove = (moveEvent) => {
+                    targetX = baseX + moveEvent.clientX - startX;
+                    targetY = baseY + moveEvent.clientY - startY;
+                    startAnimate();
+                };
+
+                const onUp = () => {
+                    isDragging = false;
+                    baseX = targetX;
+                    baseY = targetY;
+                    card.classList.remove('is-dragging');
+                    card.style.setProperty('--drag-scale', '1');
+
+                    card.removeEventListener('pointermove', onMove);
+                    card.removeEventListener('pointerup', onUp);
+                    card.removeEventListener('pointercancel', onUp);
+
+                    startAnimate();
+                };
+
+                card.addEventListener('pointermove', onMove);
+                card.addEventListener('pointerup', onUp);
+                card.addEventListener('pointercancel', onUp);
+
+                startAnimate();
+            });
+        });
+
+        const ambient = document.getElementById('ambient');
+        for (let i = 0; i < 24; i += 1) {
+            const h = document.createElement('span');
+            h.textContent = '❤';
+            h.style.left = Math.random() * 100 + '%';
+            h.style.fontSize = (Math.random() * 16 + 10) + 'px';
+            h.style.animationDuration = (Math.random() * 8 + 8) + 's';
+            h.style.animationDelay = (Math.random() * -12) + 's';
+            ambient.appendChild(h);
+        }
+
+        const screens = document.querySelectorAll('.screen');
+        const navButtons = document.querySelectorAll('[data-go]');
+
+        const isValidScreen = (id) => Array.from(screens).some((screen) => screen.id === id);
+
+        const showScreen = (id) => {
+            const nextId = isValidScreen(id) ? id : 'page1';
+
+            screens.forEach((screen) => {
+                screen.classList.toggle('is-active', screen.id === nextId);
+            });
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        navButtons.forEach((button) => {
+            button.addEventListener('click', () => {
+                showScreen(button.dataset.go || 'page1');
+            });
+        });
+
+        showScreen('page1');
+
+        const bgMusic = document.getElementById('bgMusic');
+        const tryPlayMusic = () => {
+            bgMusic.play().catch(() => {});
+        };
+
+        window.addEventListener('load', tryPlayMusic);
+        document.addEventListener('click', tryPlayMusic, { once: true });
+        document.addEventListener('touchstart', tryPlayMusic, { once: true });
+
+        const flowerEmojis = ['🌸', '🌼', '🌷', '🌹', '💐'];
+        const flowerContainer = document.createElement('div');
+        flowerContainer.className = 'flower-container';
+        document.body.appendChild(flowerContainer);
+
+        const likeStorage = JSON.parse(localStorage.getItem('quoteLikes') || '{}');
+
+        const updateLikeDisplay = (quoteCard, quoteId) => {
+            const count = likeStorage[quoteId] || 0;
+            const countEl = quoteCard.querySelector('.like-count');
+            countEl.textContent = count;
+        };
+
+        const spawnFlowers = (clickX, clickY) => {
+            for (let i = 0; i < 5; i++) {
+                const flower = document.createElement('div');
+                flower.className = 'flower-3d';
+                flower.textContent = flowerEmojis[Math.floor(Math.random() * flowerEmojis.length)];
+
+                const angle = (i / 5) * Math.PI * 2;
+                const distance = 80 + Math.random() * 60;
+                const tx = Math.cos(angle) * distance;
+                const ty = -Math.sin(angle) * distance;
+
+                flower.style.setProperty('--tx', tx + 'px');
+                flower.style.setProperty('--ty', ty + 'px');
+                flower.style.left = clickX + 'px';
+                flower.style.top = clickY + 'px';
+
+                flowerContainer.appendChild(flower);
+
+                setTimeout(() => flower.remove(), 3000);
+            }
+        };
+
+        document.querySelectorAll('.heart-btn').forEach((btn) => {
+            const quoteCard = btn.closest('.quote-card');
+            const quoteId = quoteCard.dataset.quoteId;
+
+            updateLikeDisplay(quoteCard, quoteId);
+
+            btn.addEventListener('click', (event) => {
+                event.preventDefault();
+                const rect = btn.getBoundingClientRect();
+                const clickX = rect.left + rect.width / 2;
+                const clickY = rect.top;
+
+                likeStorage[quoteId] = (likeStorage[quoteId] || 0) + 1;
+                localStorage.setItem('quoteLikes', JSON.stringify(likeStorage));
+
+                updateLikeDisplay(quoteCard, quoteId);
+                spawnFlowers(clickX, clickY);
+            });
+        });
+    </script>
+</body>
+</html>
